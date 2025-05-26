@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="F.L.A.M.E.ReportView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Background="GhostWhite" d:DesignHeight="245.088" d:DesignWidth="1120.482">
+
+    <Grid Margin="20" Background="GhostWhite">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Controls -->
+            <RowDefinition Height="Auto"/>
+            <!-- Buttons -->
+            <RowDefinition Height="*"/>
+            <!-- DataGrid -->
+        </Grid.RowDefinitions>
+        <!-- Filters Row -->
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,20,0,20" HorizontalAlignment="Center" Width="1019">
+            <TextBlock Text="Gun Name:" Margin="0 0 10 0" Height="20" VerticalAlignment="Center"/>
+            <ComboBox x:Name="GunComboBox" Width="120" Height="25"/>
+            <TextBlock Text="Start Date:" Margin="150 0 10 0" Height="18" VerticalAlignment="Center"/>
+            <DatePicker x:Name="StartDatePicker" VerticalContentAlignment="Center" Height="45" RenderTransformOrigin="0.497,0.557" Width="140"/>
+            <TextBlock Text="End Date:" Margin="150 0 10 0" Height="18" VerticalAlignment="Center"/>
+            <DatePicker x:Name="EndDatePicker" VerticalContentAlignment="Center" Height="45" Width="140"/>
+        </StackPanel>
+
+        <!-- Action Buttons Row -->
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,40,0,28" HorizontalAlignment="Center" Width="727">
+            <Button x:Name="ViewButton" FontWeight="Bold" FontSize="13" Content="View Data" Width="106" Height="35" Margin="0 0 350 5" Click="ViewButton_Click" Background="LimeGreen"/>
+            <Button x:Name="DownloadButton" FontWeight="Bold" FontSize="13" Content="Download .xlsx" Width="130" Height="35" Click="DownloadButton_Click" Background="LimeGreen"/>
+        </StackPanel>
+
+        <!-- DataGrid Scrollable Row -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,0,80,-2">
+            <DataGrid x:Name="DataGrid"
+                      AutoGenerateColumns="False"
+                      HeadersVisibility="Column"
+                      HorizontalContentAlignment="Center"
+                      CanUserAddRows="False"
+                      IsReadOnly="True"
+                      Margin="20"
+                      Width="969">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Time Stamp" Binding="{Binding Timestamp}" Width="250"/>
+                    <DataGridTextColumn Header="Gun Name" Binding="{Binding GunName}" Width="250"/>
+                    <DataGridTextColumn Header="Temperature ( °C )" Binding="{Binding Temperature}" Width="230"/>
+                    <DataGridTextColumn Header="Flow ( L / min )" Binding="{Binding Flow}" Width="240"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
