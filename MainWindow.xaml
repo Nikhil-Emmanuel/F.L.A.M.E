@@ -47,19 +47,28 @@
         </Grid.ColumnDefinitions>
 
         <!-- Sidebar -->
-        <StackPanel Grid.Column="0" Background="#FFE7F8FF">
-            <Image Source="/Assets/AL-logo.png"
+        <DockPanel Grid.Column="0" Background="#FFE7F8FF">
+            <!-- Main sidebar content -->
+            <StackPanel DockPanel.Dock="Top">
+                <Image Source="/Assets/AL-logo.png"
        Opacity="0.8"
        Stretch="Uniform"
        HorizontalAlignment="Center"
        IsHitTestVisible="False" Height="140"/>
-            <Button Content="Home" Click="Home_Click" Margin="20" Background="#FFE0E0E0" FontWeight="Bold" Foreground="Black" />
-            <Button Content="Gun Status" Click="GunStatus_Click" Margin="20" Background="#FFE0E0E0" FontWeight="Bold" Foreground="Black"/>
-            <Button Content="Shop Overview" Click="SO_Click" Margin="20" Background="#FFE0E0E0" FontWeight="Bold" Foreground="Black"/>
-            <Button Content="Report" Margin="20" Click="ReportButton_Click" Background="#FFE0E0E0" FontWeight="Bold" Foreground="Black"/>
-            <Button Content="Settings" Margin="20" Background="#FFE0E0E0" FontWeight="Bold" Foreground="Black"/>
-            <Button Content="Logout" Margin="30" Padding="8,5" Click="Logout_Click" RenderTransformOrigin="0.525,0.528" Height="36" Width="88" FontSize="12" FontWeight="Bold" Background="#FFEB1515" BorderBrush="#FFE6E6E6"/>
-        </StackPanel>
+                <Button Content="Home" Click="Home_Click" Margin="20" Background="#FFE0E0E0" FontWeight="Bold" Foreground="Black" />
+                <Button Content="Gun Status" Click="GunStatus_Click" Margin="20" Background="#FFE0E0E0" FontWeight="Bold" Foreground="Black"/>
+                <Button Content="Shop Overview" Click="SO_Click" Margin="20" Background="#FFE0E0E0" FontWeight="Bold" Foreground="Black"/>
+                <Button Content="Report" Margin="20" Click="ReportButton_Click" Background="#FFE0E0E0" FontWeight="Bold" Foreground="Black"/>
+                <Button Content="Settings" Margin="20" Click="Settings_Click" Background="#FFE0E0E0" FontWeight="Bold" Foreground="Black"/>
+                <Button Content="Logout" Margin="30" Padding="8,5" Click="Logout_Click" RenderTransformOrigin="0.525,0.528" Height="36" Width="88" FontSize="12" FontWeight="Bold" Background="#FFEB1515" BorderBrush="#FFE6E6E6"/>
+            </StackPanel>
+            <!-- PLC Status Indicator -->
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="20" VerticalAlignment="Bottom">
+                <Ellipse x:Name="PlcStatusDot" Width="12" Height="12" Fill="Red" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                <TextBlock x:Name="PlcStatusText" Text="PLC Status: Disconnected" FontWeight="Bold" VerticalAlignment="Center" Width="177" />
+            </StackPanel>
+        </DockPanel>
+
 
         <Grid Grid.Column="1" Name="MainDisplay" Background="White">
             <!-- Watermark Image -->

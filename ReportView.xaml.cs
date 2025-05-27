@@ -14,16 +14,16 @@ namespace F.L.A.M.E
     {
         private const string DbFilePath = "SensorLog.db";
 
-        public ReportView()
+        public ReportView(int a)
         {
             InitializeComponent();
-            LoadGunNames();
+            LoadGunNames(a);
         }
 
-        private void LoadGunNames()
+        private void LoadGunNames(int n)
         {
             GunComboBox.Items.Add("All Guns");
-            for (int i = 0; i < 8; i++)  // Adjust range if needed
+            for (int i = 0; i < n; i++)  // Adjust range if needed
             {
                 GunComboBox.Items.Add($"Gun {i}");
             }
@@ -34,7 +34,7 @@ namespace F.L.A.M.E
         {
             if (StartDatePicker.SelectedDate == null || EndDatePicker.SelectedDate == null)
             {
-                MessageBox.Show("Please select both start and end dates.");
+                MessageBox.Show("Please select both start and end dates !","Invalid Date Range", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -103,7 +103,7 @@ namespace F.L.A.M.E
                 workbook.Worksheets.Add(data, "SensorData");
                 workbook.SaveAs(saveFileDialog.FileName);
 
-                MessageBox.Show($"File saved: {saveFileDialog.FileName}");
+                MessageBox.Show($"File saved: {saveFileDialog.FileName}","Save Successful", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 

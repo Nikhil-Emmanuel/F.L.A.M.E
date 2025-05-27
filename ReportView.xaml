@@ -27,8 +27,56 @@
 
         <!-- Action Buttons Row -->
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,40,0,28" HorizontalAlignment="Center" Width="727">
-            <Button x:Name="ViewButton" FontWeight="Bold" FontSize="13" Content="View Data" Width="106" Height="35" Margin="0 0 350 5" Click="ViewButton_Click" Background="LimeGreen"/>
-            <Button x:Name="DownloadButton" FontWeight="Bold" FontSize="13" Content="Download .xlsx" Width="130" Height="35" Click="DownloadButton_Click" Background="LimeGreen"/>
+            <Button x:Name="ViewButton" FontWeight="Bold" FontSize="13" Content="View Data" Width="106" Height="35" Margin="0 0 350 5" Click="ViewButton_Click" Background="LimeGreen">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}"
+            CornerRadius="10"
+            Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!-- Hover effect -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="LightSeaGreen"/>
+                            </Trigger>
+                            <!-- Clicked effect -->
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="DarkGreen"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+
+                </Button.Template>
+            </Button>
+            <Button x:Name="DownloadButton" FontWeight="Bold" FontSize="13" Content="Download .xlsx" Width="130" Height="35" Click="DownloadButton_Click" Background="LimeGreen">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}"
+            CornerRadius="10"
+            Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!-- Hover effect -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="LightSeaGreen"/>
+                            </Trigger>
+                            <!-- Clicked effect -->
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="DarkGreen"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+
+                </Button.Template>
+            </Button>
         </StackPanel>
 
         <!-- DataGrid Scrollable Row -->

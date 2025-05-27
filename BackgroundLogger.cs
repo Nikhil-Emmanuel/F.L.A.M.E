@@ -1,16 +1,26 @@
 ﻿using F.L.A.M.E;
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
 public class BackgroundLogger
 {
-    private readonly MockGunDataProvider _provider;
+    private readonly PlcReader _plcReader;
     private readonly CancellationTokenSource _cts = new();
 
-    public BackgroundLogger(MockGunDataProvider provider)
+    // Thread-safe dictionary to hold the latest values
+    private readonly ConcurrentDictionary<int, GunDataEventArgs> _latestData = new();
+
+    public BackgroundLogger(PlcReader plcReader)
     {
-        _provider = provider;
+        _plcReader = plcReader;
+        _plcReader.OnGunDataUpdated += HandlePlcDataUpdate;
+    }
+
+    private void HandlePlcDataUpdate(object? sender, GunDataEventArgs e)
+    {
+        _latestData[e.GunIndex] = e;
     }
 
     public void Start()
@@ -19,11 +29,10 @@ public class BackgroundLogger
         {
             while (!_cts.Token.IsCancellationRequested)
             {
-                var dataList = _provider.GetLatestData();
-                foreach (var data in dataList)
+                foreach (var entry in _latestData.Values)
                 {
-                    string gunName = $"Gun {data.GunIndex}";
-                    SQLiteHelper.InsertData(gunName, data.Temperature, data.Flow);
+                    string gunName = $"Gun {entry.GunIndex}";
+                    SQLiteHelper.InsertData(gunName, entry.Temperature, entry.Flow);
                 }
 
                 await Task.Delay(10000, _cts.Token); // Log every 10 seconds

@@ -2,28 +2,59 @@
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace F.L.A.M.E
 {
     public partial class MainWindow : Window
     {
+        private readonly DispatcherTimer _plcStatusTimer = new DispatcherTimer();
         public MainWindow()
         {
             InitializeComponent();
+            _plcStatusTimer.Interval = TimeSpan.FromSeconds(2);
+            _plcStatusTimer.Tick += CheckPlcStatus;
+            _plcStatusTimer.Start();
         }
+
+        private void CheckPlcStatus(object? sender, EventArgs e)
+        {
+            bool isConnected = App.PlcReaderInstance?.IsConnected == true;
+
+            if (isConnected)
+            {
+                PlcStatusDot.Fill = Brushes.Green;
+                PlcStatusText.Text = "PLC Status: Connected";
+            }
+            else
+            {
+                PlcStatusDot.Fill = Brushes.Red;
+                PlcStatusText.Text = "PLC Status: Disconnected";
+            }
+        }
+
         private void GunStatus_Click(object sender, RoutedEventArgs e)
         {
             MainDisplay.Children.Clear();
           
-            var gunStatusView = new GunStatusView(8);
+            var gunStatusView = new GunStatusView(SettingsView.GunsCount);
           
             MainDisplay.Children.Add(gunStatusView);
+        }
+
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            MainDisplay.Children.Clear();
+
+            var SettingsView = new SettingsView();
+
+            MainDisplay.Children.Add(SettingsView);
         }
 
         private void SO_Click(object sender, RoutedEventArgs e)
         {
             MainDisplay.Children.Clear();
-                var shopOverviewView = new ShopOverviewView(8); // You can set any sensor count
+                var shopOverviewView = new ShopOverviewView(SettingsView.GunsCount); // You can set any sensor count
             MainDisplay.Children.Add(shopOverviewView); // You can set any sensor count
 
         }
@@ -31,7 +62,7 @@ namespace F.L.A.M.E
         {
             MainDisplay.Children.Clear();
 
-            var ReportView = new ReportView();
+            var ReportView = new ReportView(SettingsView.GunsCount);
 
             MainDisplay.Children.Add(ReportView);
         }

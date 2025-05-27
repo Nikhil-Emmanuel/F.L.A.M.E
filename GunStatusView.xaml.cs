@@ -10,16 +10,16 @@ namespace F.L.A.M.E
 {
     public partial class GunStatusView : UserControl
     {
-        private readonly MockGunDataProvider _mockProvider = new();
-
         public GunStatusView(int GunCount)
         {
             InitializeComponent();
             CreateGunBoxes(GunCount);
-            _mockProvider.OnGunDataUpdated += HandleMockDataUpdate;
-            _mockProvider.Start();
+
+            // Subscribe to PLC data updates
+            PlcReader.SharedInstance.OnGunDataUpdated += HandlePlcDataUpdate;
         }
-        private void HandleMockDataUpdate(object? sender, GunDataEventArgs e)
+
+        private void HandlePlcDataUpdate(object? sender, GunDataEventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
@@ -31,11 +31,12 @@ namespace F.L.A.M.E
                 if (tempText != null) tempText.Text = $"GUN {e.GunIndex}\n\nTemp:    {e.Temperature:F1} °C";
                 if (flowText != null) flowText.Text = $"Flow:    {e.Flow:F1} L / min";
 
-                // NEW: Update flow needle
+
                 UpdateFlowNeedle(e.GunIndex, e.Flow);
             });
         }
-        private Dictionary<int, double> _currentTemperatures = new();
+
+private Dictionary<int, double> _currentTemperatures = new();
 
         public void UpdateThermometer(int gunIndex, double temperature)
         {
@@ -57,7 +58,7 @@ namespace F.L.A.M.E
                 {
                     From = currentTemp,
                     To = temperature,
-                    Duration = TimeSpan.FromMilliseconds(800),
+                    Duration = TimeSpan.FromMilliseconds(900),
                     EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
                 };
 
@@ -315,7 +316,7 @@ namespace F.L.A.M.E
                 {
                     From = currentX,
                     To = targetX,
-                    Duration = TimeSpan.FromMilliseconds(800),
+                    Duration = TimeSpan.FromMilliseconds(900),
                     EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
                 };
                 needle.BeginAnimation(Line.X2Property, animX);

@@ -11,7 +11,7 @@ namespace F.L.A.M.E
     public partial class ShopOverviewView : UserControl
     {
         private readonly int _sensorCount;
-        private readonly MockGunDataProvider _provider = new();
+       // private readonly MockGunDataProvider _provider = new();
         private readonly Dictionary<int, TextBlock> _tempLabels = new();
         private readonly Dictionary<int, TextBlock> _flowLabels = new();
         private readonly Dictionary<int, Border> _sensorBoxes = new();
@@ -35,8 +35,10 @@ namespace F.L.A.M.E
         private void ShopOverviewView_Loaded(object sender, RoutedEventArgs e)
         {
             GenerateLayout();
-            _provider.OnGunDataUpdated += Provider_OnGunDataUpdated;
-            _provider.Start();
+            //_provider.OnGunDataUpdated += Provider_OnGunDataUpdated;
+            PlcReader.SharedInstance.OnGunDataUpdated += Provider_OnGunDataUpdated; // ✅ Subscribe to real PLC reader
+
+            //_provider.Start();
 
             // Timer setup
             _statusTimer.Interval = TimeSpan.FromSeconds(1);
