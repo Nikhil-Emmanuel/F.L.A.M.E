@@ -23,13 +23,37 @@
             <!-- Login Form -->
             <StackPanel Width="300" HorizontalAlignment="Center">
 
-                <TextBlock Text="Username:" Margin="0,10,0,5" FontFamily="Segoe UI" FontWeight="Bold" FontSize="14"/>
-                <TextBox x:Name="UsernameBox" Height="26" Width="300" VerticalContentAlignment="Center" FontSize="13" FontWeight="Medium"/>
+                <TextBlock Text="Username:" Margin="0,10,0,5" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
+                <TextBox x:Name="UsernameBox" Height="26" Width="270" VerticalContentAlignment="Center" FontSize="13" FontWeight="Medium"/>
 
-                <TextBlock Text="Password:" Margin="0,10,0,5" FontFamily="Segoe UI" FontWeight="Bold" FontSize="14"/>
-                <PasswordBox x:Name="PasswordBox" Height="26" Width="300" VerticalContentAlignment="Center"/>
+                <TextBlock Text="Password:" Margin="0,10,0,5" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
+                <PasswordBox x:Name="PasswordBox" Height="26" Width="270" VerticalContentAlignment="Center"/>
 
-                <Button Content="Login" Margin="20 30 20 0" Height="38" Background="#FF21AB00" Click="Login_Click" Foreground="White" FontSize="16" FontFamily="Bahnschrift SemiBold"/>
+                <Button Content="Login" Margin="20 50 20 0" Height="40" Background="#FF21AB00" Click="Login_Click" Foreground="White" FontSize="18" FontWeight="Heavy" FontFamily="Consolas" Width="165">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="20"
+                        Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!-- Hover effect -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="LightSeaGreen"/>
+                            </Trigger>
+                            <!-- Clicked effect -->
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="DarkGreen"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+
+                </Button.Template>
+                </Button>
             </StackPanel>
 
         </StackPanel>

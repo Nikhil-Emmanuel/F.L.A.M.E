@@ -36,9 +36,9 @@ namespace F.L.A.M.E
         private void GunStatus_Click(object sender, RoutedEventArgs e)
         {
             MainDisplay.Children.Clear();
-          
+
             var gunStatusView = new GunStatusView(SettingsView.GunsCount);
-          
+
             MainDisplay.Children.Add(gunStatusView);
         }
 
@@ -54,7 +54,7 @@ namespace F.L.A.M.E
         private void SO_Click(object sender, RoutedEventArgs e)
         {
             MainDisplay.Children.Clear();
-                var shopOverviewView = new ShopOverviewView(SettingsView.GunsCount); // You can set any sensor count
+            var shopOverviewView = new ShopOverviewView(SettingsView.GunsCount); // You can set any sensor count
             MainDisplay.Children.Add(shopOverviewView); // You can set any sensor count
 
         }

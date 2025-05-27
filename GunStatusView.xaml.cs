@@ -36,7 +36,7 @@ namespace F.L.A.M.E
             });
         }
 
-private Dictionary<int, double> _currentTemperatures = new();
+        private Dictionary<int, double> _currentTemperatures = new();
 
         public void UpdateThermometer(int gunIndex, double temperature)
         {
@@ -88,7 +88,7 @@ private Dictionary<int, double> _currentTemperatures = new();
                     HorizontalAlignment = HorizontalAlignment.Center
                 };
                 thermometerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // scale
-                thermometerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto}); // thermometer
+                thermometerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // thermometer
 
                 // Create thermometer
                 var thermometer = new ProgressBar

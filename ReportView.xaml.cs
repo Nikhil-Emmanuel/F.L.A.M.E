@@ -1,12 +1,12 @@
-﻿using System;
+﻿using ClosedXML.Excel;
+using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using ClosedXML.Excel;
-using Microsoft.Win32;
 
 namespace F.L.A.M.E
 {
@@ -34,7 +34,7 @@ namespace F.L.A.M.E
         {
             if (StartDatePicker.SelectedDate == null || EndDatePicker.SelectedDate == null)
             {
-                MessageBox.Show("Please select both start and end dates !","Invalid Date Range", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Please select both start and end dates !", "Invalid Date Range", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -47,7 +47,7 @@ namespace F.L.A.M.E
             DataTable dt = new DataTable();
 
             string gunFilter = GunComboBox.SelectedItem?.ToString() ?? "All Guns";
-            
+
 
             string connectionString = $"Data Source={DbFilePath};Version=3;";
             using SQLiteConnection conn = new(connectionString);
@@ -78,6 +78,11 @@ namespace F.L.A.M.E
 
         private void DownloadButton_Click(object sender, RoutedEventArgs e)
         {
+            if (StartDatePicker.SelectedDate == null || EndDatePicker.SelectedDate == null)
+            {
+                MessageBox.Show("Please select both start and end dates !", "Invalid Date Range", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var data = FetchSensorData();
             if (data.Rows.Count == 0)
             {
@@ -103,7 +108,7 @@ namespace F.L.A.M.E
                 workbook.Worksheets.Add(data, "SensorData");
                 workbook.SaveAs(saveFileDialog.FileName);
 
-                MessageBox.Show($"File saved: {saveFileDialog.FileName}","Save Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"File saved: {saveFileDialog.FileName}", "Save Successful", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 

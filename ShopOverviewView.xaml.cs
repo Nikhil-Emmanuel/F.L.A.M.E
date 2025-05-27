@@ -11,7 +11,7 @@ namespace F.L.A.M.E
     public partial class ShopOverviewView : UserControl
     {
         private readonly int _sensorCount;
-       // private readonly MockGunDataProvider _provider = new();
+        // private readonly MockGunDataProvider _provider = new();
         private readonly Dictionary<int, TextBlock> _tempLabels = new();
         private readonly Dictionary<int, TextBlock> _flowLabels = new();
         private readonly Dictionary<int, Border> _sensorBoxes = new();

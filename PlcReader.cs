@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 
 namespace F.L.A.M.E
 {
-    
+
     public class GunDataEventArgs : EventArgs
     {
-       
-
         public int GunIndex { get; }
         public float Temperature { get; }
         public float Flow { get; }
@@ -29,19 +27,19 @@ namespace F.L.A.M.E
         public static PlcReader SharedInstance { get; } = new PlcReader();
         private readonly string ipAddress = SettingsView.IPaddress;
         private readonly int pollInterval = 1500; // 1 second
-        
 
-        private readonly Dictionary<int, (string TempTag, string FlowTag)> gunTagMap = new()
+
+        private Dictionary<int, (string TempTag, string FlowTag)> CreateGunTagMap()
         {
-            { 0, ("Sensor_Temp_Flow[0].Temp_Out", "Sensor_Temp_Flow[0].Flow_Out") },
-            { 1, ("Sensor_Temp_Flow[1].Temp_Out", "Sensor_Temp_Flow[1].Flow_Out") },
-            { 2, ("Sensor_Temp_Flow[2].Temp_Out", "Sensor_Temp_Flow[2].Flow_Out") },
-            { 3, ("Sensor_Temp_Flow[3].Temp_Out", "Sensor_Temp_Flow[3].Flow_Out") },
-            { 4, ("Sensor_Temp_Flow[4].Temp_Out", "Sensor_Temp_Flow[4].Flow_Out") },
-            { 5, ("Sensor_Temp_Flow[5].Temp_Out", "Sensor_Temp_Flow[5].Flow_Out") },
-            { 6, ("Sensor_Temp_Flow[6].Temp_Out", "Sensor_Temp_Flow[6].Flow_Out") },
-            
-        };
+            var dict = new Dictionary<int, (string TempTag, string FlowTag)>();
+            int count = SettingsView.GunsCount;
+            for (int i = 0; i < count; i++)
+            {
+                dict[i] = ($"Sensor_Temp_Flow[{i}].Temp_Out", $"Sensor_Temp_Flow[{i}].Flow_Out");
+            }
+            return dict;
+        }
+        private Dictionary<int, (string TempTag, string FlowTag)> gunTagMap => CreateGunTagMap();
 
         private PlcController? controller;
         private readonly Dictionary<string, Tag<float>> tagCache = new();
@@ -58,7 +56,7 @@ namespace F.L.A.M.E
                 // Create and connect all tags
                 foreach (var (tempTag, flowTag) in gunTagMap.Values)
                 {
-                    var temp = controller.CreateTag<float>(tempTag);    
+                    var temp = controller.CreateTag<float>(tempTag);
                     var flow = controller.CreateTag<float>(flowTag);
                     //temp.Connect();
                     //flow.Connect();

@@ -60,12 +60,35 @@
                 <Button Content="Shop Overview" Click="SO_Click" Margin="20" Background="#FFE0E0E0" FontWeight="Bold" Foreground="Black"/>
                 <Button Content="Report" Margin="20" Click="ReportButton_Click" Background="#FFE0E0E0" FontWeight="Bold" Foreground="Black"/>
                 <Button Content="Settings" Margin="20" Click="Settings_Click" Background="#FFE0E0E0" FontWeight="Bold" Foreground="Black"/>
-                <Button Content="Logout" Margin="30" Padding="8,5" Click="Logout_Click" RenderTransformOrigin="0.525,0.528" Height="36" Width="88" FontSize="12" FontWeight="Bold" Background="#FFEB1515" BorderBrush="#FFE6E6E6"/>
+                <Button Content="Logout" Margin="30" Padding="8,5" Click="Logout_Click" RenderTransformOrigin="0.525,0.528" Height="36" Width="88" FontSize="12" FontWeight="Bold" Background="#FFEB1515" BorderBrush="#FF737373" Foreground="White">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="20"
+                            Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <!-- Hover effect -->
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="IndianRed"/>
+                                </Trigger>
+                                <!-- Clicked effect -->
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="DarkRed"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
             </StackPanel>
             <!-- PLC Status Indicator -->
-            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="20" VerticalAlignment="Bottom">
-                <Ellipse x:Name="PlcStatusDot" Width="12" Height="12" Fill="Red" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                <TextBlock x:Name="PlcStatusText" Text="PLC Status: Disconnected" FontWeight="Bold" VerticalAlignment="Center" Width="177" />
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="20" Width="166">
+                <TextBlock x:Name="PlcStatusText" Text="PLC Status: Disconnected" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="147" />
+                <Ellipse x:Name="PlcStatusDot" Width="12" Height="12" Fill="Red" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0"/>
             </StackPanel>
         </DockPanel>
 
