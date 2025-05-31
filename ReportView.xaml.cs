@@ -41,13 +41,13 @@ namespace F.L.A.M.E
             var data = FetchSensorData();
             DataGrid.ItemsSource = data.DefaultView;
         }
-
+        public string selectedGun;
         private DataTable FetchSensorData()
         {
             DataTable dt = new DataTable();
 
             string gunFilter = GunComboBox.SelectedItem?.ToString() ?? "All Guns";
-
+            selectedGun = gunFilter; // Store the selected gun for later use
 
             string connectionString = $"Data Source={DbFilePath};Version=3;";
             using SQLiteConnection conn = new(connectionString);
@@ -92,7 +92,7 @@ namespace F.L.A.M.E
 
             string start = StartDatePicker.SelectedDate?.ToString("yyyy-MM-dd") ?? "start";
             string end = EndDatePicker.SelectedDate?.ToString("yyyy-MM-dd") ?? "end";
-            string defaultFileName = $"Sensor Data ({start} to {end}).xlsx";
+            string defaultFileName = $"Sensor Data [{selectedGun}] ({start} to {end}).xlsx";
 
             // Open Save File Dialog
             SaveFileDialog saveFileDialog = new SaveFileDialog

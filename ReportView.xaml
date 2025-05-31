@@ -17,17 +17,17 @@
         </Grid.RowDefinitions>
         <!-- Filters Row -->
         <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,20,0,20" HorizontalAlignment="Center" Width="1019">
-            <TextBlock Text="Gun Name:" Margin="0 0 10 0" Height="20" VerticalAlignment="Center"/>
+            <TextBlock Text="Gun Name:" Margin="0 0 10 0" Height="20" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
             <ComboBox x:Name="GunComboBox" Width="120" Height="25"/>
-            <TextBlock Text="Start Date:" Margin="150 0 10 0" Height="18" VerticalAlignment="Center"/>
+            <TextBlock Text="Start Date:" Margin="150 0 10 0" Height="18" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
             <DatePicker x:Name="StartDatePicker" VerticalContentAlignment="Center" Height="45" RenderTransformOrigin="0.497,0.557" Width="140"/>
-            <TextBlock Text="End Date:" Margin="150 0 10 0" Height="18" VerticalAlignment="Center"/>
+            <TextBlock Text="End Date:" Margin="150 0 10 0" Height="18" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
             <DatePicker x:Name="EndDatePicker" VerticalContentAlignment="Center" Height="45" Width="140"/>
         </StackPanel>
 
         <!-- Action Buttons Row -->
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,40,0,28" HorizontalAlignment="Center" Width="727">
-            <Button x:Name="ViewButton" FontWeight="Bold" FontSize="13" Content="View Data" Width="106" Height="35" Margin="0 0 350 5" Click="ViewButton_Click" Background="LimeGreen">
+            <Button x:Name="ViewButton" FontWeight="Bold" FontSize="13" Content="View Data" Width="106" Height="35" Margin="0 0 350 5" Click="ViewButton_Click" Background="LightGreen">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border"
@@ -52,7 +52,7 @@
 
                 </Button.Template>
             </Button>
-            <Button x:Name="DownloadButton" FontWeight="Bold" FontSize="13" Content="Download .xlsx" Width="130" Height="35" Click="DownloadButton_Click" Background="LimeGreen">
+            <Button x:Name="DownloadButton" FontWeight="Bold" FontSize="13" Content="Download .xlsx" Width="130" Height="35" Click="DownloadButton_Click" Background="LightGreen">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border"

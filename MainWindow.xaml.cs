@@ -76,7 +76,7 @@ namespace F.L.A.M.E
             Image watermark = new Image
             {
                 Source = new BitmapImage(new Uri("pack://application:,,,/Assets/flame.png")),
-                Opacity = 0.06,
+                Opacity = 0.2,
                 Stretch = Stretch.Uniform,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
@@ -94,6 +94,5 @@ namespace F.L.A.M.E
             // Close this window
             this.Close();
         }
-
     }
 }

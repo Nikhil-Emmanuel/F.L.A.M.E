@@ -15,6 +15,7 @@ namespace F.L.A.M.E
 
             // Start PLC reader (singleton)
             _ = PlcReader.SharedInstance.StartPollingAsync(_cts.Token);
+            MessageBox.Show("PLC Reader started. Please wait for the connection to be established.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
 
             // Start background logger with the same PlcReader instance
             _logger = new BackgroundLogger(PlcReader.SharedInstance);

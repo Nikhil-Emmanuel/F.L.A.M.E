@@ -68,6 +68,11 @@ namespace F.L.A.M.E
             var json = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json"));
             return JsonSerializer.Deserialize<AppSettings>(json);
         }
+
+        private void IpAddressTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
     }
 
     public class AppSettings

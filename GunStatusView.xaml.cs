@@ -29,10 +29,15 @@ namespace F.L.A.M.E
 
                 UpdateThermometer(e.GunIndex, e.Temperature);
                 if (tempText != null) tempText.Text = $"GUN {e.GunIndex}\n\nTemp:    {e.Temperature:F1} °C";
-                if (flowText != null) flowText.Text = $"Flow:    {e.Flow:F1} L / min";
+                if (flowText != null)
+                {
+                    flowText.Text = $"Flow:    {e.Flow:F1} L / min";
+                    int weldsRemaining = WeldPredictor.GetWeldsRemaining(e.Temperature);
+                    flowText.Text += $"\n\nWelds Remaining: {weldsRemaining}";
+                }
 
 
-                UpdateFlowNeedle(e.GunIndex, e.Flow);
+                    UpdateFlowNeedle(e.GunIndex, e.Flow);
             });
         }
 

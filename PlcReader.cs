@@ -1,13 +1,14 @@
-﻿using PlcTag;
+﻿using libplctag;
+using libplctag.DataTypes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace F.L.A.M.E
 {
-
     public class GunDataEventArgs : EventArgs
     {
         public int GunIndex { get; }
@@ -25,9 +26,12 @@ namespace F.L.A.M.E
     public class PlcReader
     {
         public static PlcReader SharedInstance { get; } = new PlcReader();
-        private readonly string ipAddress = SettingsView.IPaddress;
-        private readonly int pollInterval = 1500; // 1 second
 
+        private string ipAddress => SettingsView.IPaddress;
+        private int pollInterval = 1500;
+
+        public bool IsConnected { get; private set; } = false;
+        public event EventHandler<GunDataEventArgs>? OnGunDataUpdated;
 
         private Dictionary<int, (string TempTag, string FlowTag)> CreateGunTagMap()
         {
@@ -39,89 +43,77 @@ namespace F.L.A.M.E
             }
             return dict;
         }
+
         private Dictionary<int, (string TempTag, string FlowTag)> gunTagMap => CreateGunTagMap();
 
-        private PlcController? controller;
-        private readonly Dictionary<string, Tag<float>> tagCache = new();
-        public bool IsConnected { get; private set; } = false;
+        private async Task<float?> TryReadTagAsync(string tagName)
+        {
+            var tag = new Tag<RealPlcMapper, float>
+            {
+                Name = tagName,
+                Gateway = ipAddress,
+                Path = "1,0",
+                PlcType = PlcType.ControlLogix,
+                Protocol = Protocol.ab_eip,
+                Timeout = TimeSpan.FromSeconds(2)
+            };
 
-        public event EventHandler<GunDataEventArgs>? OnGunDataUpdated;
+            try
+            {
+                await tag.ReadAsync();
+                return tag.Value;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"❌ Error reading tag '{tagName}': {ex.Message}");
+                return null;
+            }
+        }
 
         public async Task StartPollingAsync(CancellationToken cancellationToken)
         {
-            controller = new PlcController(ipAddress, "0", CPUType.LGX);
-            try
+            int i=0;
+            while (i<5 && !cancellationToken.IsCancellationRequested)
             {
-                Console.WriteLine("BEFORE LOOOOOOPPPPPPP");
-                // Create and connect all tags
-                foreach (var (tempTag, flowTag) in gunTagMap.Values)
+                bool anySuccessful = false;
+
+                foreach (var (gunIndex, (tempTag, flowTag)) in gunTagMap)
                 {
-                    var temp = controller.CreateTag<float>(tempTag);
-                    var flow = controller.CreateTag<float>(flowTag);
-                    //temp.Connect();
-                    //flow.Connect();
-                    tagCache[tempTag] = temp;
-                    tagCache[flowTag] = flow;
-                }
-                IsConnected = true;
-            }
-            catch (TagOperationException ex)
-            {
-                Console.WriteLine($"Error connecting to PLC: {ex.Message}");
-                IsConnected = false;
-                return;
-            }
+                    //SimulateMockData(gunIndex); // Simulate data for testing
+                    //anySuccessful = true;
+                    //continue;
+                    MessageBox.Show($"Reading data for Gun {gunIndex}...", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                    var tempTask = TryReadTagAsync(tempTag);
+                    var flowTask = TryReadTagAsync(flowTag);
 
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                foreach (var gun in gunTagMap)
-                {
-                    int gunIndex = gun.Key;
-                    string tempTagName = gun.Value.TempTag;
-                    string flowTagName = gun.Value.FlowTag;
-                    try
-                    {
-                        // ✅ Comment the following two lines to use real PLC data
-                        SimulateMockData(gunIndex); 
-                        continue;
+                    await Task.WhenAll(tempTask, flowTask);
 
-                        Tag<float> tempTag = tagCache[tempTagName];
-                        Tag<float> flowTag = tagCache[flowTagName];
+                   // if (tempTask.Result.HasValue && flowTask.Result.HasValue)
+                    //{
+                        float temp = tempTask.Result.Value;
+                        float flow = flowTask.Result.Value;
+                        MessageBox.Show($"Gun {gunIndex}: Temp={temp}°C, Flow={flow} L/min", "Gun Data", MessageBoxButton.OK, MessageBoxImage.Information);
+                        i++;
 
-                        tempTag.Read();
-                        flowTag.Read();
-
-                        float temp = tempTag.LastValueRead;
-                        float flow = flowTag.LastValueRead;
-
-                        OnGunDataUpdated?.Invoke(this, new GunDataEventArgs(gunIndex, temp, flow));
-                        IsConnected = true;
-                    }
-                    catch
-                    {
-                        IsConnected = false;
-                    }
+                    OnGunDataUpdated?.Invoke(this, new GunDataEventArgs(gunIndex, temp, flow));
+                        anySuccessful = true;
+                    //}
                 }
 
+                IsConnected = anySuccessful;
                 await Task.Delay(pollInterval, cancellationToken);
             }
 
-            foreach (var tag in tagCache.Values)
-            {
-                tag.Disconnect();
-            }
             IsConnected = false;
         }
-        private readonly Random _random = new();
 
+        private readonly Random _random = new();
         private void SimulateMockData(int gunIndex)
         {
-            float temp = (float)(_random.NextDouble() * (50 - 15) + 15); // Random temp between 15°C and 50°C
-            float flow = (float)(_random.NextDouble() * (30 - 5) + 5);   // Random flow between 5 and 30 L/min
-
+            float temp = (float)(_random.NextDouble() * (50 - 15) + 15); // 15 to 50 °C
+            float flow = (float)(_random.NextDouble() * (30 - 5) + 5);   // 5 to 30 L/min
             OnGunDataUpdated?.Invoke(this, new GunDataEventArgs(gunIndex, temp, flow));
             IsConnected = true;
         }
-
     }
 }
