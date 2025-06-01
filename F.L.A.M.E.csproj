@@ -49,4 +49,8 @@
     </ApplicationDefinition>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="ethernet-ip\ethernetip.csproj" />
+  </ItemGroup>
+
 </Project>

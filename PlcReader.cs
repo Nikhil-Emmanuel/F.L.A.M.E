@@ -1,4 +1,123 @@
-﻿using libplctag;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using System.Timers;
+
+namespace F.L.A.M.E
+{
+    public class GunDataEventArgs : EventArgs
+    {
+        public int GunIndex { get; }
+        public float Temperature { get; }
+        public float Flow { get; }
+
+        public GunDataEventArgs(int gunIndex, float temperature, float flow)
+        {
+            GunIndex = gunIndex;
+            Temperature = temperature;
+            Flow = flow;
+        }
+    }
+
+    public class PlcReader
+    {
+        public static PlcReader SharedInstance { get; } = new PlcReader();
+
+        private const string JsonFilePath = "sensor_data.json";
+        private readonly System.Timers.Timer pollTimer;
+        private int pollInterval = 2000;
+        private bool isReading = false;
+        public bool IsConnected { get; private set; } = false;
+        public event EventHandler<GunDataEventArgs>? OnGunDataUpdated;
+
+        private PlcReader()
+        {
+            pollTimer = new System.Timers.Timer(pollInterval);
+            pollTimer.Elapsed += PollTimerElapsed;
+            pollTimer.AutoReset = true;
+        }
+
+        public void StartMockPolling()
+        {
+            pollTimer.Start();
+        }
+
+        public void StopMockPolling()
+        {
+            pollTimer.Stop();
+        }
+
+        private async void PollTimerElapsed(object? sender, ElapsedEventArgs e)
+        {
+            if (isReading) return;
+            isReading = true;
+            try
+            {
+                await ReadJsonAndUpdateAsync();
+            }
+            finally
+            {
+                isReading = false;
+            }
+        }
+
+        private async Task ReadJsonAndUpdateAsync()
+        {
+            try
+            {
+                if (!File.Exists(JsonFilePath))
+                {
+                    IsConnected = false;
+                    return;
+                }
+
+                string jsonContent = await File.ReadAllTextAsync(JsonFilePath);
+                var sensorList = JsonSerializer.Deserialize<List<SensorData>>(jsonContent);
+
+                if (sensorList == null || sensorList.Count == 0)
+                {
+                    IsConnected = false;
+                    return;
+                }
+
+                foreach (var sensor in sensorList)
+                {
+                    OnGunDataUpdated?.Invoke(this, new GunDataEventArgs(sensor.GunIndex, sensor.Temperature, sensor.FlowRate));
+                    Debug.WriteLine($"Gun {sensor.GunIndex}: Temp={sensor.Temperature}°C, Flow={sensor.FlowRate} L/min, Timestamp={sensor.Timestamp}");
+                }
+
+                IsConnected = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error reading sensor_data.json: {ex.Message}");
+                IsConnected = false;
+            }
+        }
+
+        private class SensorData
+        {
+            [JsonPropertyName("gunIndex")]
+            public int GunIndex { get; set; }
+
+            [JsonPropertyName("timestamp")]
+            public string Timestamp { get; set; } = string.Empty;
+
+            [JsonPropertyName("flowRate")]
+            public float FlowRate { get; set; }
+
+            [JsonPropertyName("temperature")]
+            public float Temperature { get; set; }
+        }
+    }
+}
+
+
+/*using libplctag;
 using libplctag.DataTypes;
 using System;
 using System.Collections.Generic;
@@ -37,7 +156,7 @@ namespace F.L.A.M.E
         {
             var dict = new Dictionary<int, (string TempTag, string FlowTag)>();
             int count = SettingsView.GunsCount;
-            for (int i = 0; i < count; i++)
+            for (int i = 1; i < count; i++)
             {
                 dict[i] = ($"Sensor_Temp_Flow[{i}].Temp_Out", $"Sensor_Temp_Flow[{i}].Flow_Out");
             }
@@ -46,21 +165,23 @@ namespace F.L.A.M.E
 
         private Dictionary<int, (string TempTag, string FlowTag)> gunTagMap => CreateGunTagMap();
 
-        private async Task<float?> TryReadTagAsync(string tagName)
+        private float? TryReadTag(string tagName)
         {
-            var tag = new Tag<RealPlcMapper, float>
+            MessageBox.Show($"Reading tag '{tagName}' from PLC at {ipAddress}...", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            var tag = new Tag<RealPlcMapper,float>
             {
                 Name = tagName,
-                Gateway = ipAddress,
+                Gateway = "192.168.1.1",
                 Path = "1,0",
                 PlcType = PlcType.ControlLogix,
                 Protocol = Protocol.ab_eip,
-                Timeout = TimeSpan.FromSeconds(2)
+                Timeout = TimeSpan.FromSeconds(5)
             };
 
             try
             {
-                await tag.ReadAsync();
+                tag.Read();
+                MessageBox.Show($"Tag Value'{tagName}':{tag.Value}", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
                 return tag.Value;
             }
             catch (Exception ex)
@@ -72,32 +193,26 @@ namespace F.L.A.M.E
 
         public async Task StartPollingAsync(CancellationToken cancellationToken)
         {
-            int i=0;
-            while (i<5 && !cancellationToken.IsCancellationRequested)
+            int i = 0;
+            while (i < 5 && !cancellationToken.IsCancellationRequested)
             {
                 bool anySuccessful = false;
 
                 foreach (var (gunIndex, (tempTag, flowTag)) in gunTagMap)
                 {
-                    //SimulateMockData(gunIndex); // Simulate data for testing
-                    //anySuccessful = true;
-                    //continue;
-                    MessageBox.Show($"Reading data for Gun {gunIndex}...", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                    var tempTask = TryReadTagAsync(tempTag);
-                    var flowTask = TryReadTagAsync(flowTag);
+                    MessageBox.Show($"Reading data FOR Gun {gunIndex}...", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    await Task.WhenAll(tempTask, flowTask);
+                    var temp = TryReadTag(tempTag);
+                    var flow = TryReadTag(flowTag);
 
-                   // if (tempTask.Result.HasValue && flowTask.Result.HasValue)
-                    //{
-                        float temp = tempTask.Result.Value;
-                        float flow = flowTask.Result.Value;
-                        MessageBox.Show($"Gun {gunIndex}: Temp={temp}°C, Flow={flow} L/min", "Gun Data", MessageBoxButton.OK, MessageBoxImage.Information);
-                        i++;
+                    if (temp.HasValue && flow.HasValue)
+                    {
+                        MessageBox.Show($"Gun {gunIndex}: Temp={temp.Value}°C, Flow={flow.Value} L/min", "Gun Data", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    OnGunDataUpdated?.Invoke(this, new GunDataEventArgs(gunIndex, temp, flow));
+                        OnGunDataUpdated?.Invoke(this, new GunDataEventArgs(gunIndex, temp.Value, flow.Value));
                         anySuccessful = true;
-                    //}
+                        i++;
+                    }
                 }
 
                 IsConnected = anySuccessful;
@@ -106,7 +221,6 @@ namespace F.L.A.M.E
 
             IsConnected = false;
         }
-
         private readonly Random _random = new();
         private void SimulateMockData(int gunIndex)
         {
@@ -117,3 +231,4 @@ namespace F.L.A.M.E
         }
     }
 }
+*/
