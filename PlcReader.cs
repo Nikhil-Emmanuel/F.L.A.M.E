@@ -25,6 +25,10 @@ namespace F.L.A.M.E
 
     public class PlcReader
     {
+        private DateTime _lastUpdateTime = DateTime.MinValue;
+        private readonly TimeSpan timeout = TimeSpan.FromSeconds(5);
+        private Dictionary<int, (float Temperature, float FlowRate)> _lastSensorValues = new();
+
         public static PlcReader SharedInstance { get; } = new PlcReader();
 
         private const string JsonFilePath = "sensor_data.json";
@@ -84,13 +88,37 @@ namespace F.L.A.M.E
                     return;
                 }
 
+                bool anyChanged = false;
+
                 foreach (var sensor in sensorList)
                 {
-                    OnGunDataUpdated?.Invoke(this, new GunDataEventArgs(sensor.GunIndex, sensor.Temperature, sensor.FlowRate));
-                    Debug.WriteLine($"Gun {sensor.GunIndex}: Temp={sensor.Temperature}°C, Flow={sensor.FlowRate} L/min, Timestamp={sensor.Timestamp}");
+                    var index = sensor.GunIndex;
+                    var currentTemp = sensor.Temperature;
+                    var currentFlow = sensor.FlowRate;
+
+                    // Check if value changed since last update
+                    if (!_lastSensorValues.TryGetValue(index, out var last) ||
+                        last.Temperature != currentTemp || last.FlowRate != currentFlow)
+                    {
+                        _lastSensorValues[index] = (currentTemp, currentFlow);
+                        OnGunDataUpdated?.Invoke(this, new GunDataEventArgs(index, currentTemp, currentFlow));
+                        anyChanged = true;
+                    }
                 }
 
-                IsConnected = true;
+                if (anyChanged)
+                {
+                    _lastUpdateTime = DateTime.Now;
+                    IsConnected = true;
+                }
+                else
+                {
+                    // If no data change for more than timeout, mark as disconnected
+                    if (DateTime.Now - _lastUpdateTime > timeout)
+                    {
+                        IsConnected = false;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -98,6 +126,7 @@ namespace F.L.A.M.E
                 IsConnected = false;
             }
         }
+
 
         private class SensorData
         {
