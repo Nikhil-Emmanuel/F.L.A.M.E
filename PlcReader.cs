@@ -26,14 +26,14 @@ namespace F.L.A.M.E
     public class PlcReader
     {
         private DateTime _lastUpdateTime = DateTime.MinValue;
-        private readonly TimeSpan timeout = TimeSpan.FromSeconds(5);
+        private readonly TimeSpan timeout = TimeSpan.FromSeconds(2);
         private Dictionary<int, (float Temperature, float FlowRate)> _lastSensorValues = new();
 
         public static PlcReader SharedInstance { get; } = new PlcReader();
 
         private const string JsonFilePath = "sensor_data.json";
         private readonly System.Timers.Timer pollTimer;
-        private int pollInterval = 2000;
+        private int pollInterval = 1000;
         private bool isReading = false;
         public bool IsConnected { get; private set; } = false;
         public event EventHandler<GunDataEventArgs>? OnGunDataUpdated;

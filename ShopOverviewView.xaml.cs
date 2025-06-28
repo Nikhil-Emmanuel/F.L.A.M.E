@@ -14,6 +14,7 @@ namespace F.L.A.M.E
         // private readonly MockGunDataProvider _provider = new();
         private readonly Dictionary<int, TextBlock> _tempLabels = new();
         private readonly Dictionary<int, TextBlock> _flowLabels = new();
+        private readonly Dictionary<int, TextBlock> predictflow = new();
         private readonly Dictionary<int, Border> _sensorBoxes = new();
         private readonly Dictionary<int, DateTime> _lastUpdateTimes = new();
         private readonly DispatcherTimer _statusTimer = new DispatcherTimer();
@@ -58,6 +59,7 @@ namespace F.L.A.M.E
                 if (_flowLabels.ContainsKey(e.GunIndex))
                 {
                     _flowLabels[e.GunIndex].Text = $"Flow: {e.Flow:F1} L / min";
+                    predictflow[e.GunIndex].Text = $"Days Left: {FlowPredictor.GetDaysRemaining(e.Flow)}";
                 }
 
                 if (_sensorBoxes.ContainsKey(e.GunIndex))
@@ -152,7 +154,7 @@ namespace F.L.A.M.E
                 };
                 PipeCanvas.Children.Add(tempText);
                 Canvas.SetLeft(tempText, x - BoxSize - 50);
-                Canvas.SetTop(tempText, y + 35);
+                Canvas.SetTop(tempText, y + 45);
 
                 // Flow label
                 var flowText = new TextBlock
@@ -164,10 +166,23 @@ namespace F.L.A.M.E
                 };
                 PipeCanvas.Children.Add(flowText);
                 Canvas.SetLeft(flowText, x - BoxSize - 50);
-                Canvas.SetTop(flowText, y + 15);
+                Canvas.SetTop(flowText, y + 25);
+
+                var predict = new TextBlock
+                {
+                    Text = $"Days Left: 0",
+                    Margin = new Thickness(5, 0, 0, 0), 
+                    FontSize = 12,
+                    FontWeight = FontWeights.Bold
+                };
+                PipeCanvas.Children.Add(predict);
+                Canvas.SetLeft(predict, x - BoxSize - 50);
+                Canvas.SetTop(predict, y + 5);
+
 
                 _tempLabels[i] = tempText;
                 _flowLabels[i] = flowText;
+                predictflow[i] = predict;
                 _sensorBoxes[i] = box;
 
                 // Pipe point
