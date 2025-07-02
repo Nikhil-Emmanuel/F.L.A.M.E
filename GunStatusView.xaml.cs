@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -18,6 +19,8 @@ namespace F.L.A.M.E
             // Subscribe to PLC data updates
             PlcReader.SharedInstance.OnGunDataUpdated += HandlePlcDataUpdate;
         }
+        private Dictionary<int, (double MaxTemp, double MinTemp, double MaxFlow, double MinFlow)> _gunStats = new();
+
 
         private void HandlePlcDataUpdate(object? sender, GunDataEventArgs e)
         {
@@ -28,16 +31,34 @@ namespace F.L.A.M.E
                 var flowText = FindName($"GunFlow{e.GunIndex}") as TextBlock;
 
                 UpdateThermometer(e.GunIndex, e.Temperature);
-                if (tempText != null) tempText.Text = $"GUN {e.GunIndex}\n\nTemp:    {e.Temperature:F1} °C";
+                if (tempText != null) tempText.Text = $"GUN {e.GunIndex}\n\n\t        Temp:    {e.Temperature:F1} °C";
                 if (flowText != null)
                 {
-                    flowText.Text = $"Flow:    {e.Flow:F1} L / min";
+                    flowText.Text = $"\t        Flow:    {e.Flow:F1} L / min";
                     int weldsRemaining = WeldPredictor.GetWeldsRemaining(e.Temperature);
-                    flowText.Text += $"\n\nWelds Remaining: {weldsRemaining}";
+                    flowText.Text += $"\n\n\t        Welds Remaining: {weldsRemaining}";
+                }
+                    UpdateFlowNeedle(e.GunIndex, e.Flow);
+                //Track max/ min stats per gun
+                if (!_gunStats.ContainsKey(e.GunIndex))
+                    _gunStats[e.GunIndex] = (e.Temperature, e.Temperature, e.Flow, e.Flow);
+                else
+                {
+                    var stats = _gunStats[e.GunIndex];
+                    stats.MaxTemp = Math.Max(stats.MaxTemp, e.Temperature);
+                    stats.MinTemp = Math.Min(stats.MinTemp, e.Temperature);
+                    stats.MaxFlow = Math.Max(stats.MaxFlow, e.Flow);
+                    stats.MinFlow = Math.Min(stats.MinFlow, e.Flow);
+                    _gunStats[e.GunIndex] = stats;
                 }
 
-
-                    UpdateFlowNeedle(e.GunIndex, e.Flow);
+                // Update max/min text
+                if (FindName($"GunStats{e.GunIndex}") is TextBlock statsBlock)
+                {
+                    var stats = _gunStats[e.GunIndex];
+                    statsBlock.Text = $"Max Temp: {stats.MaxTemp:F1} °C \t|\t Max Flow: {stats.MaxFlow:F1} L/m\n\n" +
+                                      $"Min Temp: {stats.MinTemp:F1} °C \t|\t Min Flow: {stats.MinFlow:F1} L/m";
+                }
             });
         }
 
@@ -77,7 +98,7 @@ namespace F.L.A.M.E
         {
             for (int i = 0; i < count; i++)
             {
-                var border = new Border
+                var border = new System.Windows.Controls.Border
                 {
                     BorderBrush = Brushes.Gray,
                     BorderThickness = new Thickness(1),
@@ -164,6 +185,18 @@ namespace F.L.A.M.E
                 stackPanel.Children.Add(flowMeterArc);
                 stackPanel.Children.Add(labelTemp);
                 stackPanel.Children.Add(labelFlow);
+                var statsBlock = new TextBlock
+                {
+                    Name = $"GunStats{i}",
+                    Text = $"Max Temp: 0°C \t | \t Min Temp: 0°C \nMax Flow: 0 L/m \t | \t Min F: 0 L/m",
+                    FontWeight = FontWeights.Bold,
+                    Margin = new Thickness(0, 10, 0, 0),
+                    FontSize = 11,
+                    HorizontalAlignment = HorizontalAlignment.Left
+                };
+                this.RegisterName(statsBlock.Name, statsBlock);
+                stackPanel.Children.Add(statsBlock);
+
 
                 border.Child = stackPanel;
                 GunGrid.Children.Add(border);

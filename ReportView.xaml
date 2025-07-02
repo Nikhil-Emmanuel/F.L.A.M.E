@@ -26,7 +26,7 @@
         </StackPanel>
 
         <!-- Action Buttons Row -->
-        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,40,0,28" HorizontalAlignment="Center" Width="727">
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,40,0,28" HorizontalAlignment="Center" Width="589">
             <Button x:Name="ViewButton" FontWeight="Bold" FontSize="13" Content="View Data" Width="106" Height="35" Margin="0 0 350 5" Click="ViewButton_Click" Background="LightGreen">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
@@ -81,21 +81,35 @@
 
         <!-- DataGrid Scrollable Row -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,0,80,-2">
-            <DataGrid x:Name="DataGrid"
-                      AutoGenerateColumns="False"
-                      HeadersVisibility="Column"
-                      HorizontalContentAlignment="Center"
-                      CanUserAddRows="False"
-                      IsReadOnly="True"
-                      Margin="20"
-                      Width="969">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Time Stamp" Binding="{Binding Timestamp}" Width="250"/>
-                    <DataGridTextColumn Header="Gun Name" Binding="{Binding GunName}" Width="250"/>
-                    <DataGridTextColumn Header="Temperature ( °C )" Binding="{Binding Temperature}" Width="230"/>
-                    <DataGridTextColumn Header="Flow ( L / min )" Binding="{Binding Flow}" Width="240"/>
-                </DataGrid.Columns>
-            </DataGrid>
+            <StackPanel Orientation="Vertical">
+                <!-- Live Data Grid -->
+                <DataGrid x:Name="DataGrid"
+                  AutoGenerateColumns="False"
+                  HeadersVisibility="Column"
+                  HorizontalContentAlignment="Center"
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  Margin="20"
+                  Width="969">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Time Stamp" Binding="{Binding Timestamp}" Width="250"/>
+                        <DataGridTextColumn Header="Gun Name" Binding="{Binding GunName}" Width="250"/>
+                        <DataGridTextColumn Header="Temperature ( °C )" Binding="{Binding Temperature}" Width="230"/>
+                        <DataGridTextColumn Header="Flow ( L / min )" Binding="{Binding Flow}" Width="240"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
         </ScrollViewer>
+        <ProgressBar x:Name="ProgressBarControl"
+             Height="20"
+             Margin="433,49,447,39"
+             Width="200"
+             Visibility="Collapsed"
+             IsIndeterminate="True"
+             Foreground="ForestGreen"
+             Background="WhiteSmoke"
+             Grid.Row="1" />
+
+
     </Grid>
 </UserControl>
