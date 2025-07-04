@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36109.1 d17.14
+VisualStudioVersion = 17.14.36109.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "F.L.A.M.E", "F.L.A.M.E.csproj", "{ED48E8C8-8D6F-4034-934F-7D7275335760}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FLAME.Core", "..\FLAME.Core\FLAME.Core.csproj", "{8A207D0D-0204-4558-AF92-616F9D410CA8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FLAME.Logger", "..\FLAME.Logger\FLAME.Logger.csproj", "{C26F41B6-8BDB-4008-B74C-468841DDD2C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{ED48E8C8-8D6F-4034-934F-7D7275335760}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED48E8C8-8D6F-4034-934F-7D7275335760}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED48E8C8-8D6F-4034-934F-7D7275335760}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A207D0D-0204-4558-AF92-616F9D410CA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A207D0D-0204-4558-AF92-616F9D410CA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A207D0D-0204-4558-AF92-616F9D410CA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A207D0D-0204-4558-AF92-616F9D410CA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C26F41B6-8BDB-4008-B74C-468841DDD2C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C26F41B6-8BDB-4008-B74C-468841DDD2C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C26F41B6-8BDB-4008-B74C-468841DDD2C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C26F41B6-8BDB-4008-B74C-468841DDD2C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

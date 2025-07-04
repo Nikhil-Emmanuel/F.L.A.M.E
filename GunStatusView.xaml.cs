@@ -188,7 +188,7 @@ namespace F.L.A.M.E
                 var statsBlock = new TextBlock
                 {
                     Name = $"GunStats{i}",
-                    Text = $"Max Temp: 0°C \t | \t Min Temp: 0°C \nMax Flow: 0 L/m \t | \t Min F: 0 L/m",
+                    Text = $"Max Temp: 0°C \t\t| \tMin Temp: 0°C \n\nMax Flow: 0 L/m \t| \tMin F: 0 L/m",
                     FontWeight = FontWeights.Bold,
                     Margin = new Thickness(0, 10, 0, 0),
                     FontSize = 11,

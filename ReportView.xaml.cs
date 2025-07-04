@@ -2,17 +2,20 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.Data.SQLite;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using System.Windows.Threading;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace F.L.A.M.E
 {
-    public partial class ReportView : UserControl
+    public partial class ReportView : UserControl, INotifyPropertyChanged
     {
         private const string DbFilePath = "SensorLog.db";
 
@@ -20,7 +23,15 @@ namespace F.L.A.M.E
         {
             InitializeComponent();
             LoadGunNames(a);
+            this.DataContext = this;
+
         }
+
+        private const int PageSize = 100; // You can adjust page size
+        private int currentPage = 1;
+        private int totalPages;
+        private List<SensorDataRow> allSensorData = new(); // Full data fetched once
+        public string PageInfoText => $"Page {currentPage} of {totalPages}";
 
         private void LoadGunNames(int n)
         {
@@ -31,6 +42,16 @@ namespace F.L.A.M.E
             }
             GunComboBox.SelectedIndex = 0;
         }
+        public ObservableCollection<SensorDataRow> SensorDataList { get; set; } = new();
+
+        public class SensorDataRow
+        {
+            public DateTime Timestamp { get; set; }
+            public string GunName { get; set; }
+            public double Temperature { get; set; }
+            public double Flow { get; set; }
+        }
+
 
         private async void ViewButton_Click(object sender, RoutedEventArgs e)
         {
@@ -40,26 +61,17 @@ namespace F.L.A.M.E
                 return;
             }
 
-            // ✅ Capture values early (UI-safe)
             string gunFilter = GunComboBox.SelectedItem?.ToString() ?? "All Guns";
             selectedGun = gunFilter;
             DateTime start = StartDatePicker.SelectedDate.Value.Date;
-            DateTime end = StartDatePicker.SelectedDate.Value.Date.AddDays(1).AddSeconds(-1);
+            DateTime end = EndDatePicker.SelectedDate.Value.Date.AddDays(1).AddSeconds(-1);
 
-            // ✅ Set cursor and show progress bar before blocking
             Mouse.OverrideCursor = Cursors.Wait;
             ProgressBarControl.Visibility = Visibility.Visible;
 
-            // ✅ Yield to UI thread to allow rendering (crucial)
-            await Task.Delay(800); // give UI time to show loader
-
             try
             {
-                // ✅ Background task for DB
-                var data = await Task.Run(() => FetchSensorData(gunFilter, start, end));
-
-                // ✅ Back to UI thread
-                DataGrid.ItemsSource = data.DefaultView;
+                await Task.Run(() => FetchSensorDataStreaming(gunFilter, start, end));
             }
             catch (Exception ex)
             {
@@ -67,9 +79,82 @@ namespace F.L.A.M.E
             }
             finally
             {
-                // ✅ Restore UI state
                 ProgressBarControl.Visibility = Visibility.Collapsed;
                 Mouse.OverrideCursor = null;
+            }
+        }
+        private async Task FetchSensorDataStreaming(string gunFilter, DateTime start, DateTime end)
+        {
+            string connectionString = $"Data Source={DbFilePath};Version=3;";
+
+            using SQLiteConnection conn = new(connectionString);
+            await conn.OpenAsync();
+
+            string query = "SELECT Timestamp, GunName, Temperature, Flow FROM SensorData WHERE Timestamp >= @start AND Timestamp <= @end";
+            if (gunFilter != "All Guns")
+                query += " AND GunName = @gunName";
+
+            using SQLiteCommand cmd = new(query, conn);
+            cmd.Parameters.AddWithValue("@start", start.ToString("yyyy-MM-dd HH:mm:ss"));
+            cmd.Parameters.AddWithValue("@end", end.ToString("yyyy-MM-dd HH:mm:ss"));
+            if (gunFilter != "All Guns")
+                cmd.Parameters.AddWithValue("@gunName", gunFilter);
+
+            using SQLiteDataReader reader = (SQLiteDataReader)await cmd.ExecuteReaderAsync();
+
+            allSensorData.Clear();
+            while (await reader.ReadAsync())
+            {
+                var row = new SensorDataRow
+                {
+                    Timestamp = reader.GetDateTime(0),
+                    GunName = reader.GetString(1),
+                    Temperature = reader.GetDouble(2),
+                    Flow = reader.GetDouble(3)
+                };
+                allSensorData.Add(row);
+            }
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                totalPages = (allSensorData.Count / PageSize);
+                currentPage = 1;
+                OnPropertyChanged(nameof(PageInfoText));
+                UpdatePagedView();
+                //Debug.WriteLine($"[DEBUG] currentPage={currentPage}, totalPages={totalPages}, PageInfoText={PageInfoText}");
+
+            });
+
+        }
+
+        private void UpdatePagedView()
+        {
+            SensorDataList.Clear();
+            int start = (currentPage - 1) * PageSize;
+            foreach (var row in allSensorData.Skip(start).Take(PageSize))
+            {
+                SensorDataList.Add(row);
+            }
+            OnPropertyChanged(nameof(PageInfoText));
+        }
+        
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        private void PreviousPage_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentPage > 1)
+            {
+                --currentPage;
+                UpdatePagedView();
+            }
+        }
+
+        private void NextPage_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentPage < totalPages)
+            {
+                ++currentPage;
+                UpdatePagedView();
             }
         }
 
@@ -79,14 +164,20 @@ namespace F.L.A.M.E
         {
             DataTable dt = new DataTable();
 
-            string connectionString = $"Data Source={DbFilePath};Version=3;Cache=Shared;Journal Mode=Wal;";
+            string connectionString = $"Data Source={DbFilePath};Version=3;";
 
             using SQLiteConnection conn = new(connectionString);
             conn.Open();
 
-            string query = "SELECT Timestamp, GunName, Temperature, Flow FROM SensorData WHERE Timestamp BETWEEN @start AND @end";
+            string query = "SELECT Timestamp, GunName, Temperature, Flow FROM SensorData WHERE Timestamp >= @start AND Timestamp <= @end";
             if (gunFilter != "All Guns")
+            {
                 query += " AND GunName = @gunName";
+            }
+                
+            Debug.WriteLine($"Fetching from {start:yyyy-MM-dd HH:mm:ss} to {end:yyyy-MM-dd HH:mm:ss}");
+            Debug.WriteLine($"Query: {query}");
+
 
             using SQLiteCommand cmd = new(query, conn);
             cmd.Parameters.AddWithValue("@start", start.ToString("yyyy-MM-dd HH:mm:ss"));
@@ -110,11 +201,11 @@ namespace F.L.A.M.E
             // Get inputs on UI thread first
             string gunFilter = GunComboBox.SelectedItem?.ToString() ?? "All Guns";
             DateTime start = StartDatePicker.SelectedDate.Value.Date;
-            DateTime end = StartDatePicker.SelectedDate.Value.Date.AddDays(1).AddSeconds(-1);
+            DateTime end = EndDatePicker.SelectedDate.Value.Date.AddDays(1).AddSeconds(-1);
             selectedGun = gunFilter;
-
+            Debug.WriteLine($"DOWNLOAD END DATE: {end}");
             ProgressBarControl.Visibility = Visibility.Visible;
-            Task.Delay(1000); // Give time for UI to render
+            await Task.Delay(800); // Give time for UI to render
             DataTable data;
             try
             {
@@ -151,9 +242,72 @@ namespace F.L.A.M.E
                     await Task.Run(() =>
                     {
                         using XLWorkbook workbook = new();
-                        workbook.Worksheets.Add(data, "SensorData");
+                        
+                        var sensordata=workbook.Worksheets.Add(data, "SensorData");
+                        sensordata.Columns().AdjustToContents(); // Adjust column widths
+
+                        // Generate summary table
+                        DataTable summaryTable = new DataTable();
+                        summaryTable.Columns.Add("Date");
+                        summaryTable.Columns.Add("GunName");
+                        summaryTable.Columns.Add("Max Temperature");
+                        summaryTable.Columns.Add("Max Temp Time");
+                        summaryTable.Columns.Add("Min Temperature");
+                        summaryTable.Columns.Add("Min Temp Time");
+                        summaryTable.Columns.Add("Max Flow");
+                        summaryTable.Columns.Add("Max Flow Time");
+                        summaryTable.Columns.Add("Min Flow");
+                        summaryTable.Columns.Add("Min Flow Time");
+
+                        var grouped = data.AsEnumerable()
+                            .GroupBy(row => new
+                            {
+                                Date = DateTime.Parse(row["Timestamp"].ToString()).Date,
+                                Gun = row["GunName"].ToString()
+                            });
+
+                        foreach (var group in grouped)
+                        {
+                            var rows = group.ToList();
+
+                            var maxTempRow = rows.OrderByDescending(r => Convert.ToDouble(r["Temperature"])).First();
+                            var minTempRow = rows.OrderBy(r => Convert.ToDouble(r["Temperature"])).First();
+                            var maxFlowRow = rows.OrderByDescending(r => Convert.ToDouble(r["Flow"])).First();
+                            var minFlowRow = rows.OrderBy(r => Convert.ToDouble(r["Flow"])).First();
+
+                            summaryTable.Rows.Add(
+                                group.Key.Date.ToString("yyyy-MM-dd"),
+                                group.Key.Gun,
+                                maxTempRow["Temperature"],
+                                maxTempRow["Timestamp"],
+                                minTempRow["Temperature"],
+                                minTempRow["Timestamp"],
+                                maxFlowRow["Flow"],
+                                maxFlowRow["Timestamp"],
+                                minFlowRow["Flow"],
+                                minFlowRow["Timestamp"]
+                            );
+                        }
+                        var summarySheet = workbook.Worksheets.Add(summaryTable, "Summary");
+
+                        // Apply colors
+                        var headerRow = summarySheet.Row(1);
+                        headerRow.Style.Font.Bold = true;
+                        headerRow.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+                        int rowCount = summarySheet.RowsUsed().Count();
+                        for (int i = 2; i <= rowCount; i++) // Start from row 2 (skip header)
+                        {
+                            summarySheet.Cell(i, 3).Style.Font.FontColor = XLColor.Red;     // Max Temp
+                            summarySheet.Cell(i, 5).Style.Font.FontColor = XLColor.Green;   // Min Temp
+                            summarySheet.Cell(i, 7).Style.Font.FontColor = XLColor.Red;     // Max Flow
+                            summarySheet.Cell(i, 9).Style.Font.FontColor = XLColor.Green;   // Min Flow
+                        }
+
+                        summarySheet.Columns().AdjustToContents();
                         workbook.SaveAs(saveFileDialog.FileName);
                     });
+
 
                     MessageBox.Show($"File saved: {saveFileDialog.FileName}", "Save Successful", MessageBoxButton.OK, MessageBoxImage.Information);
                 }

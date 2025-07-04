@@ -84,6 +84,21 @@
                         </ControlTemplate>
                     </Button.Template>
                 </Button>
+                <!-- Server Control Buttons -->
+                <StackPanel Margin="0,-10,0,0" Width="214" Height="76">
+                    <TextBlock Text="Server Control:" Margin="0,0,0,20" HorizontalAlignment="Left" FontWeight="Bold" FontSize="13" Width="94"/>
+                    <StackPanel Orientation="Horizontal" Width="108">
+                        <Button Width="32" Height="32" Click="StartServer_Click" Margin="0,0,40,0" Background="LightGreen" ToolTip="Start Server">
+                            <TextBlock FontSize="16" FontWeight="Bold" Text="▶" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                        </Button>
+                        <Button Width="32" Height="32" Click="StopServer_Click" Background="IndianRed" ToolTip="Stop Server">
+                            <TextBlock FontSize="16" FontWeight="Bold" Text="■" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Button>
+                    </StackPanel>
+                    
+
+                </StackPanel>
+
             </StackPanel>
             <!-- PLC Status Indicator -->
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="20" Width="166">

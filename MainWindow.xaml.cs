@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -15,6 +17,64 @@ namespace F.L.A.M.E
             _plcStatusTimer.Interval = TimeSpan.FromSeconds(2);
             _plcStatusTimer.Tick += CheckPlcStatus;
             _plcStatusTimer.Start();
+        }
+
+        private void StartServer_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string exeDir = AppDomain.CurrentDomain.BaseDirectory;
+                string batchPath = Path.Combine(exeDir, "StartServer.bat");
+
+                if (!File.Exists(batchPath))
+                {
+                    MessageBox.Show("StartServer.bat not found.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                ProcessStartInfo psi = new ProcessStartInfo
+                {
+                    FileName = batchPath,
+                    Verb = "runas", // This runs as administrator
+                    UseShellExecute = true,
+                    WorkingDirectory = exeDir
+                };
+
+                Process.Start(psi);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to start server:\n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void StopServer_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string exeDir = AppDomain.CurrentDomain.BaseDirectory;
+                string batchPath = Path.Combine(exeDir, "StopServer.bat");
+
+                if (!File.Exists(batchPath))
+                {
+                    MessageBox.Show("StopServer.bat not found.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                ProcessStartInfo psi = new ProcessStartInfo
+                {
+                    FileName = batchPath,
+                    Verb = "runas", // This runs as administrator
+                    UseShellExecute = true,
+                    WorkingDirectory = exeDir
+                };
+
+                Process.Start(psi);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to stop server:\n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void CheckPlcStatus(object? sender, EventArgs e)

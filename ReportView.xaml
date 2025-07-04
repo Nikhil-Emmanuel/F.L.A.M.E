@@ -4,7 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             Background="GhostWhite" d:DesignHeight="245.088" d:DesignWidth="1120.482">
+             Background="GhostWhite" d:DesignWidth="1120.482" >
 
     <Grid Margin="20" Background="GhostWhite">
         <Grid.RowDefinitions>
@@ -16,7 +16,7 @@
             <!-- DataGrid -->
         </Grid.RowDefinitions>
         <!-- Filters Row -->
-        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,20,0,20" HorizontalAlignment="Center" Width="1019">
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="70,20,0,20" HorizontalAlignment="Left" Width="946">
             <TextBlock Text="Gun Name:" Margin="0 0 10 0" Height="20" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
             <ComboBox x:Name="GunComboBox" Width="120" Height="25"/>
             <TextBlock Text="Start Date:" Margin="150 0 10 0" Height="18" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
@@ -26,8 +26,8 @@
         </StackPanel>
 
         <!-- Action Buttons Row -->
-        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,40,0,28" HorizontalAlignment="Center" Width="589">
-            <Button x:Name="ViewButton" FontWeight="Bold" FontSize="13" Content="View Data" Width="106" Height="35" Margin="0 0 350 5" Click="ViewButton_Click" Background="LightGreen">
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="259,34,0,34" HorizontalAlignment="Left" Width="634">
+            <Button x:Name="ViewButton" FontWeight="Bold" FontSize="13" Content="Preview Data" Width="106" Height="44" Margin="0 0 350 0" Click="ViewButton_Click" Background="LightGreen">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border"
@@ -52,9 +52,9 @@
 
                 </Button.Template>
             </Button>
-            <Button x:Name="DownloadButton" FontWeight="Bold" FontSize="13" Content="Download .xlsx" Width="130" Height="35" Click="DownloadButton_Click" Background="LightGreen">
+            <Button x:Name="DownloadButton" FontWeight="Bold" FontSize="13" Content="Download Excel(.xlsx)" Width="155" Height="44" Click="DownloadButton_Click" Background="LightGreen">
                 <Button.Template>
-                    <ControlTemplate TargetType="Button">
+                    <ControlTemplate TargetType="{x:Type Button}">
                         <Border x:Name="border"
             Background="{TemplateBinding Background}"
             BorderBrush="{TemplateBinding BorderBrush}"
@@ -80,36 +80,41 @@
         </StackPanel>
 
         <!-- DataGrid Scrollable Row -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,0,80,-2">
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,0,49,-2">
             <StackPanel Orientation="Vertical">
                 <!-- Live Data Grid -->
                 <DataGrid x:Name="DataGrid"
                   AutoGenerateColumns="False"
                   HeadersVisibility="Column"
+                  ItemsSource="{Binding SensorDataList}"
                   HorizontalContentAlignment="Center"
                   CanUserAddRows="False"
                   IsReadOnly="True"
                   Margin="20"
                   Width="969">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Time Stamp" Binding="{Binding Timestamp}" Width="250"/>
+                        <DataGridTextColumn Header="Time Stamp" Binding="{Binding Timestamp, StringFormat='yyyy-MM-dd HH:mm:ss'}" Width="250"/>
                         <DataGridTextColumn Header="Gun Name" Binding="{Binding GunName}" Width="250"/>
                         <DataGridTextColumn Header="Temperature ( °C )" Binding="{Binding Temperature}" Width="230"/>
                         <DataGridTextColumn Header="Flow ( L / min )" Binding="{Binding Flow}" Width="240"/>
                     </DataGrid.Columns>
                 </DataGrid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="20" Width="261">
+                    <Button Content="Previous" Click="PreviousPage_Click" Width="70" Height="30"/>
+                    <TextBlock Text="{Binding PageInfoText}" Margin="10" VerticalAlignment="Center" Width="100"/>
+                    <Button Content="Next" Click="NextPage_Click" Height="30" Width="70"/>
+
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
         <ProgressBar x:Name="ProgressBarControl"
              Height="20"
-             Margin="433,49,447,39"
+             Margin="347,47,533,46"
              Width="200"
              Visibility="Collapsed"
              IsIndeterminate="True"
              Foreground="ForestGreen"
              Background="WhiteSmoke"
              Grid.Row="1" />
-
-
     </Grid>
 </UserControl>
